@@ -1,54 +1,154 @@
-# 📄 Universal PDF Q&A Assistant
+# 📄 Local-First PDF Q&A Assistant
 
-## Overview
+A lightweight Retrieval-Augmented Generation (RAG) application that allows users to upload PDF documents and ask questions about their content.
 
-Universal PDF Q&A Assistant is an AI-powered web application that allows users to upload any PDF document and ask questions about its contents. The application extracts text from the uploaded PDF and uses Google's Gemini AI to generate accurate and context-aware answers based on the document.
+This project follows a local-first approach using **PyMuPDF4LLM** for document extraction and **Llama.cpp** for local language model inference.
 
-## Features
+---
 
-* Upload any PDF document
-* Ask questions related to the uploaded PDF
-* AI-generated answers using Google Gemini
-* PDF text extraction and processing
-* Interactive and user-friendly interface
-* Fast and accurate document understanding
+## 🚀 Features
 
-## Technologies Used
+- Upload PDF documents
+- Extract structured content using PyMuPDF4LLM
+- Convert documents into Markdown format
+- Retrieve relevant context from the document
+- Answer questions using a local LLM
+- Offline document question answering
+- Lightweight RAG workflow
 
-* Python
-* Streamlit
-* Google Gemini API
-* PyPDF
-* Python Dotenv
+---
 
-## How It Works
+## 🏗️ Architecture
 
-1. Upload a PDF document.
-2. The application extracts text from the PDF.
-3. Enter a question related to the document.
-4. Gemini AI analyzes the document content.
-5. The application generates and displays an answer based on the uploaded PDF.
+```
+PDF Upload
+    ↓
+PyMuPDF4LLM
+    ↓
+Markdown Extraction
+    ↓
+Context Retrieval
+    ↓
+Llama.cpp
+    ↓
+Answer Generation
+```
 
-## Installation
+---
+
+## 🛠️ Technologies Used
+
+- Python
+- Streamlit
+- PyMuPDF4LLM
+- PyMuPDF
+- Llama.cpp
+- Qwen2.5-3B-Instruct GGUF Model
+
+---
+
+## 📂 Project Structure
+
+```
+PDF_RAG_CHATBOT/
+│
+├── app.py
+├── requirements.txt
+├── AGENT.md
+├── SKILLS.md
+├── README.md
+│
+└── models/
+    └── qwen2.5-3b-instruct-q4_k_m.gguf
+```
+
+---
+
+## ⚙️ Installation
+
+### 1. Clone Repository
+
+```bash
+git clone <repository-url>
+cd PDF_RAG_CHATBOT
+```
+
+### 2. Create Virtual Environment
+
+```bash
+python -m venv venv
+```
+
+### 3. Activate Environment
+
+Windows:
+
+```bash
+venv\Scripts\activate
+```
+
+### 4. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
+```
+
+### 5. Download GGUF Model
+
+Download:
+
+```
+Qwen2.5-3B-Instruct-Q4_K_M.gguf
+```
+
+Place it inside:
+
+```text
+models/
+```
+
+---
+
+## ▶️ Run Application
+
+```bash
 streamlit run app.py
 ```
 
-## Future Enhancements
+---
 
-* Multi-PDF support
-* Chat history
-* Real RAG implementation using embeddings and vector databases
-* PDF summarization
-* Keyword highlighting
-* Citation-based responses
+## 📖 How It Works
 
-## Project Goal
+1. User uploads a PDF document.
+2. PyMuPDF4LLM extracts content and converts it to Markdown.
+3. The document is divided into sections.
+4. Relevant context is retrieved based on the user's question.
+5. Llama.cpp processes the retrieved context.
+6. The system generates an answer locally.
 
-The goal of this project is to make document understanding easier by enabling users to interact with PDF files through natural language questions and receive intelligent AI-generated responses.
+---
 
-## Team
+## 🎯 Objectives
 
-Developed as an AI-powered document question-answering solution using Streamlit and Google Gemini.
+- Build a local-first document intelligence system.
+- Reduce dependency on cloud APIs.
+- Implement a lightweight RAG workflow.
+- Enable offline PDF question answering.
+
+---
+
+## 🔮 Future Improvements
+
+- Vector database integration
+- Semantic search using embeddings
+- Multi-document support
+- Improved retrieval ranking
+- Chat history support
+
+---
+
+## 👨‍💻 Author
+
+Bhavishya Beesaiah Gari
+
+Internship Project – PDF RAG Chatbot using PyMuPDF4LLM and Llama.cpp
