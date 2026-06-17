@@ -1,4 +1,4 @@
 streamlit
-google-genai
-python-dotenv
-pypdf
+pymupdf
+pymupdf4llm
+llama-cpp-python
