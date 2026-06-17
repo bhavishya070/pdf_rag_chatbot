@@ -1,72 +1,93 @@
 import streamlit as st
-from pypdf import PdfReader
-from google import genai
-from dotenv import load_dotenv
-import os
+import tempfile
+import pymupdf4llm
+from llama_cpp import Llama
 
-# Load API key
-load_dotenv()
-
-api_key = os.getenv("GEMINI_API_KEY")
+# Load local model
+llm = Llama(
+    model_path="models/qwen2.5-3b-instruct-q4_k_m.gguf",
+    n_ctx=4096,
+    verbose=False
+)
 
 st.set_page_config(
-    page_title="Universal PDF Q&A Assistant",
+    page_title="Local Document Q&A",
     page_icon="📄",
     layout="wide"
 )
 
-st.title("📄 Universal PDF Q&A Assistant")
-st.subheader("📁 Upload PDF & Ask Questions")
+st.title("📄 Local-First Document Q&A")
+st.subheader("PyMuPDF4LLM + Llama.cpp")
 
-# Check API key
-if not api_key:
-    st.error("GEMINI_API_KEY not found in .env file")
-    st.stop()
-
-# Gemini client
-client = genai.Client(api_key=api_key)
-
-# Upload PDF
 uploaded_file = st.file_uploader(
-    "Upload any PDF",
+    "Upload PDF",
     type=["pdf"]
 )
 
-if uploaded_file:
+def split_sections(markdown_text):
+    return markdown_text.split("\n# ")
 
-    pdf_reader = PdfReader(uploaded_file)
+def retrieve_context(question, sections):
 
-    pdf_text = ""
+    best_section = ""
+    best_score = 0
 
-    for page in pdf_reader.pages:
-        text = page.extract_text()
-        if text:
-            pdf_text += text + "\n"
+    for section in sections:
 
-    st.success("PDF Loaded Successfully!")
+        score = sum(
+            word.lower() in section.lower()
+            for word in question.split()
+        )
 
-    st.write(f"**Total characters:** {len(pdf_text)}")
+        if score > best_score:
+            best_score = score
+            best_section = section
 
-    with st.expander("Preview PDF Text"):
-        st.text(pdf_text[:3000])
+    return best_section
+
+if uploaded_file is not None:
+
+    with tempfile.NamedTemporaryFile(
+        delete=False,
+        suffix=".pdf"
+    ) as tmp:
+
+        tmp.write(uploaded_file.read())
+        pdf_path = tmp.name
+
+    with st.spinner("Extracting document..."):
+        markdown_text = pymupdf4llm.to_markdown(pdf_path)
+
+    sections = split_sections(markdown_text)
+
+    st.success("Document processed successfully!")
+
+    with st.expander("Preview Extracted Content"):
+        st.text(markdown_text[:3000])
 
     question = st.text_input(
-        "Ask your question from the uploaded PDF"
+        "Ask a question about the document"
     )
 
     if st.button("Get Answer"):
 
         if not question:
             st.warning("Please enter a question.")
+
         else:
 
+            context = retrieve_context(
+                question,
+                sections
+            )
+
             prompt = f"""
-You are a PDF assistant.
+You are a document assistant.
 
-Use ONLY the information provided below.
+Use ONLY the provided context.
 
-PDF Content:
-{pdf_text}
+Context:
+{context}
 
 Question:
 {question}
@@ -74,17 +95,14 @@ Question:
 Answer clearly and concisely.
 """
 
-            try:
+            with st.spinner("Generating answer..."):
 
-                with st.spinner("Analyzing PDF..."):
+                response = llm(
+                    prompt,
+                    max_tokens=300
+                )
 
-                    response = client.models.generate_content(
-                        model="gemini-2.5-flash",
-                        contents=prompt
-                    )
+            answer = response["choices"][0]["text"]
 
-                st.markdown("## 🤖 Answer")
-                st.write(response.text)
-
-            except Exception as e:
-                st.error(f"Gemini Error: {e}")
+            st.markdown("## 🤖 Answer")
+            st.write(answer)
